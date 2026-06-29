@@ -12,6 +12,7 @@ repertoire data. Standalone and self-contained — no external package required.
 | `scripts/tcr_analysis/gene_diversity.R` | R (dplyr, ggplot2) | Gene-usage diversity per group: richness, Shannon entropy, evenness, inverse Simpson, Gini; bar (mean) + points, faceted by segment. |
 | `scripts/tcr_analysis/cdr3_composition.R` | R (dplyr, ggplot2, ggseqlogo) | Compare CDR3 sub-sequence amino-acid composition across groups; position x AA heatmap + per-group sequence logo. |
 | `scripts/tcr_analysis/cdr3_length.R` | R (dplyr, ggplot2) | Compare CDR3 length (aa) distributions across groups; per-group length-frequency table + summary stats, frequency-polygon plot. |
+| `scripts/tcr_analysis/aa_position_compare.R` | R (dplyr, ggplot2) | Compare the amino-acid (k-mer) at one CDR3 position across groups; heatmap of all groups, or a two-group g1-vs-g2 frequency scatter. |
 
 All three R scripts share the same options: a `group_cols` vector defining the
 comparison unit, a `gene_cols` / `cdr3_col` selector, and a `unique_by` argument
@@ -48,4 +49,13 @@ c3$composition; c3$heatmap; c3$logo
 source("scripts/tcr_analysis/cdr3_length.R")
 l <- tcr_cdr3_length(data, group_cols = "antigen.epitope", cdr3_col = "cdr3.beta")
 l$lengths; l$summary; l$plot
+
+source("scripts/tcr_analysis/aa_position_compare.R")
+# heatmap of the amino acid at position 5 across all epitopes
+p <- tcr_aa_position_compare(data, group_cols = "antigen.epitope", position = 5)
+p$composition; p$plot
+# two-group scatter of doublets (k = 2) at position 5
+p2 <- tcr_aa_position_compare(data, group_cols = "antigen.epitope", position = 5,
+                              k = 2, groups = c("epitopeA", "epitopeB"), top_n = 30)
+p2$plot
 ```
