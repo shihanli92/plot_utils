@@ -13,6 +13,7 @@ repertoire data. Standalone and self-contained — no external package required.
 | `scripts/tcr_analysis/cdr3_composition.R` | R (dplyr, ggplot2, ggseqlogo) | Compare CDR3 sub-sequence amino-acid composition across groups; position x AA heatmap + per-group sequence logo. |
 | `scripts/tcr_analysis/cdr3_length.R` | R (dplyr, ggplot2) | Compare CDR3 length (aa) distributions across groups; per-group length-frequency table + summary stats, frequency-polygon plot. |
 | `scripts/tcr_analysis/aa_position_compare.R` | R (dplyr, ggplot2) | Compare the amino-acid (k-mer) at one CDR3 position across groups; heatmap of all groups, or a two-group g1-vs-g2 frequency scatter. |
+| `scripts/tcr_analysis/cdr3_selfreactivity.R` | R (dplyr, ggplot2) | Score each CDR3 by its position-6/7 doublet (self-reactive / neutral / hydrophilic) and report the proportion of each class per group; stacked-bar plot. |
 
 All three R scripts share the same options: a `group_cols` vector defining the
 comparison unit, a `gene_cols` / `cdr3_col` selector, and a `unique_by` argument
@@ -58,4 +59,10 @@ p$composition; p$plot
 p2 <- tcr_aa_position_compare(data, group_cols = "antigen.epitope", position = 5,
                               k = 2, groups = c("epitopeA", "epitopeB"), top_n = 30)
 p2$plot
+
+source("scripts/tcr_analysis/cdr3_selfreactivity.R")
+# proportion of CDR3s that are self-reactive (position-6/7 doublet) per epitope
+s <- tcr_cdr3_selfreactivity(data, group_cols = "antigen.epitope")
+s$proportions; s$plot
+subset(s$proportions, class == "self-reactive")   # the self-reactive fraction
 ```
