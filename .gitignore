@@ -1,0 +1,10 @@
+# Downloaded / derived data (large, reproducible from scripts)
+*.zip
+vdjdb_paired.csv
+*.csv
+
+# OS / editor
+.DS_Store
+.Rhistory
+.RData
+__pycache__/
