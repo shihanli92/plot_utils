@@ -15,6 +15,7 @@ repertoire data. Standalone and self-contained — no external package required.
 | `scripts/tcr_analysis/aa_position_compare.R` | R (dplyr, ggplot2) | Compare the amino-acid (k-mer) at one CDR3 position across groups; heatmap of all groups, or a two-group g1-vs-g2 frequency scatter. |
 | `scripts/tcr_analysis/cdr3_selfreactivity.R` | R (dplyr, ggplot2) | Score each CDR3 by its position-6/7 doublet (self-reactive / neutral / hydrophilic) and report the proportion of each class per group; stacked-bar plot. |
 | `scripts/tcr_analysis/tcr_scoring.R` | R (base) | conga-style per-TCR feature scoring. Private helper per feature + master `tcr_score()` returning a score table (one row per TCR, one column per feature): `cdr3len`, `old_imhc`, `mait`, `inkt`, `alphadist`, V/J gene-presence, and AA-property/`*_frac` scores (hydropathy, charge, volume, Kidera, Atchley, …) over the FG-loop or central window. |
+| `scripts/tcr_analysis/tcr_nbrhood.R` | R (base) | conga-style neighbourhood enrichment of TCR features. `tcr_nbrhood_zscore(scores, nbrs)` tests, per TCR and feature, whether a TCR's kNN neighbourhood is enriched for high/low feature values (foreground-vs-background Welch t + Bonferroni). Takes a caller-supplied neighbour matrix — pairs with [`tcrdistR::tcrdist_knn`](https://github.com/shihanli92/tcrdistR). |
 
 All three R scripts share the same options: a `group_cols` vector defining the
 comparison unit, a `gene_cols` / `cdr3_col` selector, and a `unique_by` argument
@@ -76,4 +77,13 @@ head(st)
 all_tcr_features            # every nameable feature (+ any TRAV/TRAJ/TRBV/TRBJ gene)
 # AA-property features accept a window suffix: "hydropathy_cen", "A_frac_fg", ...
 # feed st into the grouping/plotting scripts above for per-group comparisons
+
+source("scripts/tcr_analysis/tcr_nbrhood.R")
+# neighbourhood enrichment: does each TCR's kNN neighbourhood have high/low features?
+# neighbours come from tcrdistR (columns va, cdr3a, vb, cdr3b):
+library(tcrdistR)
+knn <- tcrdist_knn(tcrs[, c("va","cdr3a","vb","cdr3b")], "human", K = 50L)
+res <- tcr_nbrhood_zscore(st, knn$knn_indices)   # st = tcr_score() output
+res$z              # Welch t per (TCR, feature): +ve = neighbourhood enriched high
+tcr_nbrhood_hits(res)                            # significant (TCR, feature) pairs
 ```
