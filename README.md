@@ -14,6 +14,7 @@ repertoire data. Standalone and self-contained — no external package required.
 | `scripts/tcr_analysis/cdr3_length.R` | R (dplyr, ggplot2) | Compare CDR3 length (aa) distributions across groups; per-group length-frequency table + summary stats, frequency-polygon plot. |
 | `scripts/tcr_analysis/aa_position_compare.R` | R (dplyr, ggplot2) | Compare the amino-acid (k-mer) at one CDR3 position across groups; heatmap of all groups, or a two-group g1-vs-g2 frequency scatter. |
 | `scripts/tcr_analysis/cdr3_selfreactivity.R` | R (dplyr, ggplot2) | Score each CDR3 by its position-6/7 doublet (self-reactive / neutral / hydrophilic) and report the proportion of each class per group; stacked-bar plot. |
+| `scripts/tcr_analysis/tcr_scoring.R` | R (base) | conga-style per-TCR feature scoring. Private helper per feature + master `tcr_score()` returning a score table (one row per TCR, one column per feature): `cdr3len`, `old_imhc`, `mait`, `inkt`, `alphadist`, V/J gene-presence, and AA-property/`*_frac` scores (hydropathy, charge, volume, Kidera, Atchley, …) over the FG-loop or central window. |
 
 All three R scripts share the same options: a `group_cols` vector defining the
 comparison unit, a `gene_cols` / `cdr3_col` selector, and a `unique_by` argument
@@ -65,4 +66,14 @@ source("scripts/tcr_analysis/cdr3_selfreactivity.R")
 s <- tcr_cdr3_selfreactivity(data, group_cols = "antigen.epitope")
 s$proportions; s$plot
 subset(s$proportions, class == "self-reactive")   # the self-reactive fraction
+
+source("scripts/tcr_analysis/tcr_scoring.R")
+# conga-style feature table: one row per TCR, one column per feature
+st <- tcr_score(data,
+                features = c("cdr3len","hydropathy","charge","mait","alphadist"),
+                keep_cols = c("antigen.epitope","meta.tissue"))
+head(st)
+all_tcr_features            # every nameable feature (+ any TRAV/TRAJ/TRBV/TRBJ gene)
+# AA-property features accept a window suffix: "hydropathy_cen", "A_frac_fg", ...
+# feed st into the grouping/plotting scripts above for per-group comparisons
 ```
